@@ -170,7 +170,11 @@ To use undohist, you just call this function."
       (with-temp-buffer
         (insert-file-contents undo-file)
         (goto-char (point-min))
-        (let ((alist (undohist-decode (read (current-buffer)))))
+        (let ((alist (undohist-decode (condition-case err-var
+                                          (read (current-buffer))
+                                        (error
+                                         (message "undohist %s load error: %s" undo-file err-var)
+                                         ())))))
           (if (string= (md5 buffer) (assoc-default 'digest alist))
               (setq undo-list (assoc-default 'undo-list alist))
             (message "File digest doesn't match, so undo history will be discarded."))))
